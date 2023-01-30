@@ -18,14 +18,21 @@ function Update-ExchangeCertificate {
         .PARAMETER SmbShareUsername
         Required. The username used to access the SMB share.
 
-        .PARAMETER SmbSharePassword
+        .PARAMETER SmbPassword
         Required. The password used to access the SMB share.
 
+       .PARAMETER SmbPasswordHashFilePath
+        File path to the password hash for accessing the SMB share.
+
+        .PARAMETER pfxPassword
+        Password for the PFX file containing the certificate.
+
         .PARAMETER PfxPasswordHashPath
-        Required. The path of the file containing the password hash for the PFX file.
+        File path to the password hash for the PFX file containing the certificate.
 
         .PARAMETER Initiate
-        Optional. A switch parameter to initiate the the hash files for the password.
+        Switch parameter for creating hash files to store the password data from -SmbPassword
+        and -pfxPassword for later use.
 
         .PARAMETER WhatIf
         Optional. A switch parameter to simulate the update process.
@@ -34,18 +41,32 @@ function Update-ExchangeCertificate {
         Optional. A switch parameter to confirm the update process.
 
         .EXAMPLE
-        Update-ExchangeCertificate -SmbSharePath \\fileshare\certs -Fqdn mail.contoso.com
-        -SmbShareUsername user -SmbSharePassword (ConvertTo-SecureString -String 'P@ssw0rd'
-        -AsPlainText -Force) -PfxPasswordHashPath C:\temp\pfxpassword.txt -Confirm
-        This example updates the certificate used by an Exchange server by importing a new
-        certificate from the \\fileshare\certs SMB share, using the username 'user' and
-        password 'P@ssw0rd' to access the share, and the password hash file located at
-        C:\temp\pfxpassword.txt for the PFX file. It also prompts for confirmation before
-        proceeding with the update process.
+        Update-ExchangeCertificate -SmbSharePath \\server\share -Fqdn "www.contoso.com"
+        -SmbShareUsername "user" -SmbPassword "password" -pfxPassword "pfxPassword" -Initiate
+        Updates the certificate for the website "www.contoso.com" by connecting to the SMB
+        share at "\\server\share" with username "user" and password "password", then specifies
+        the password for the PFX file as "pfxPassword", and restarts the website with the new
+        certificate. Also with the -initiate parameter the the data for -SmbPassword and
+        -pfxPassword will be stored in hash files for later use.
+
+        .EXAMPLE
+        Update-ExchangeCertificate -SmbSharePath \\server\share -Fqdn "www.contoso.com"
+        -SmbShareUsername "user" -SmbPasswordHashFilePath "C:\PasswordHashFile"
+        -pfxPasswordHashPath "C:\pfxPasswordHash"
+        Updates the certificate for the website "www.contoso.com" by connecting to the SMB
+        share at "\\server\share" with username "user" and password hash stored in
+        "C:\PasswordHashFile", then specifies the password hash for the PFX file stored in
+        "C:\pfxPasswordHash", and restarts the website with the new certificate.
 
         .NOTES
         This function uses the PSCredential, System.Management.Automation, and
-        Import-PfxCertificate cmdlets.
+        Import-PfxCertificate cmdlets. This script requires the Remote Server Administration
+        Tools (RSAT) to be installed on the local machine.
+
+        Version:        1.0
+        Author:         [Author Name]
+        Creation Date:  [Date]
+        Purpose/Change: [Purpose or change description]
     #>
 
     [CmdletBinding(SupportsShouldProcess=$true)]
